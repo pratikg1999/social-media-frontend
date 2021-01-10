@@ -1,17 +1,20 @@
 import React, { Component } from "react";
-import { Grid, Paper, Box, Typography } from "@material-ui/core";
+import { Grid, Paper, Box, Typography, Avatar } from "@material-ui/core";
 import classes from "./comment.module.css";
+import axios from "../../axiosInstance";
 const Comment = (props) => {
     return (
-        <Grid container justify="space-around" className="text-left">
-            <Grid item xs={2} className="text-center" mx={1}>
+        <Grid container justify="space-between" className="text-left p-2" >
+            <Grid item className={`text-center ${classes.avatarArea}`} mx={1} >
                 {/* circular avatar of commenter */}
-                <img src={props.userImage} width="50px" height="50px" style={{borderRadius: "50%"}}></img>
+                <Avatar src={axios.defaults.baseURL + props.createdBy.profileImage} alt={`${props.createdBy.firstName[0].toUpperCase()}${props.createdBy.lastName[0].toUpperCase()}`}/>
             </Grid>
-            <Grid item xs={10}  mx={1} className="p-2">
-                <div className={classes.title}>{props.userName}</div>
-                <div><span className={classes.subtitle}>{props.creationTime.toString()}</span></div>
-                <div className={props.commentBody}>{props.body}</div>
+            <Grid item mx={1} style={{flexGrow: 2}}>
+                <div className={classes.bodyArea}>
+                    <div className={classes.title}>{`${props.createdBy.firstName} ${props.createdBy.lastName}`}</div>
+                    <div className={classes.commentBody}>{props.body}</div>
+                </div>
+                <div style={{lineHeight: "2px"}} className="pl-2 pt-1"><span className={classes.subtitle}>{props.creationTime.toString()}</span></div>
             </Grid>
         </Grid>
     );

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Profile from "../../components/profile";
+import UserProfile from "../../components/userProfile";
 import { connect } from "react-redux";
 import axios from "../../axiosInstance";
 import * as actions from "../../store/actions";
@@ -8,8 +9,38 @@ class ProfilePage extends Component {
     state = {
         info: {},
     }
-
     componentDidMount() {
+        this.fetchUserInfo();
+    }
+
+    onFollow = (followingId) => {
+        axios.put("/user/following", {followingId: followingId}).then(({data})=>{
+            this.fetchUserInfo();
+        })
+        .catch(err=>{
+            console.log(err);
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Can't follow user" });
+
+        })
+    }
+
+    onUnfollow = (followingId)=>{
+        axios.delete("/user/following", {data:{followingId: followingId}}).then(({data})=>{
+            this.fetchUserInfo();
+        })
+        .catch(err=>{
+            console.log(err);
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Can't follow user" });
+
+        })
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(prevProps.match.params.userId !== this.props.match.params.userId){
+            this.fetchUserInfo();
+        }
+    }
+    fetchUserInfo(){
         let { userId } = this.props.match.params;
         console.log("profpage mounted ", this.props.currentUserInfo);
 
@@ -29,6 +60,7 @@ class ProfilePage extends Component {
             this.setState({ info: this.props.currentUserInfo });
         }
     }
+    
     updateProfile = (formData) => {
         this.props.modifyState({ isLoading: true });
         axios.post(`/user/updateInfo`, formData, { 'Content-Type': 'multipart/form-data' }).then(response => {
@@ -45,7 +77,10 @@ class ProfilePage extends Component {
         return (
             <>
                 { Object.keys(info).length > 0 && !this.props.isLoading ?
-                    <Profile editable={this.props.match.params.userId ? false : true} info={info} handleUpdateProfile={this.updateProfile} modifyState={this.props.modifyState} />
+                    (
+                        this.props.match.params.userId ? <UserProfile info={info} onFollow={this.onFollow} onUnfollow={this.onUnfollow}/> 
+                        :<Profile editable={this.props.match.params.userId ? false : true} info={info} handleUpdateProfile={this.updateProfile} modifyState={this.props.modifyState} />
+                    )
                     : null
                 }
             </>

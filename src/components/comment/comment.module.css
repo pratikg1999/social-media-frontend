@@ -1,5 +1,5 @@
 .title{
-    font-size: large;
+    font-size: small;
     font-weight: bold;
 }
 
@@ -8,5 +8,16 @@
     color: darkgrey;
 }
 .commentBody {
+    margin-top: 3px;
     font-size: small;
+}
+
+.bodyArea {
+    background-color: whitesmoke;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.avatarArea{
+    padding: 5px;
 }

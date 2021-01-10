@@ -10,7 +10,7 @@ class AddPost extends React.Component {
 
     submitForm = (e) => {
         e.preventDefault();
-        console.log(e.target.body.value, e.target.image.value);
+        // console.log(e.target.body.value, e.target.image.value);
         if (e.target.body.value || e.target.image.value) {
             this.props.addPost(new FormData(e.target));
         }
@@ -27,7 +27,7 @@ class AddPost extends React.Component {
         return (
             <Paper>
                 <form onSubmit={this.submitForm}>
-                    <Grid container>
+                    <Grid container className="p-3 mt-3">
                         <Grid item xs={12}>
                             <Typography variant="h6">Have something in mind?</Typography>
                         </Grid>
@@ -35,7 +35,7 @@ class AddPost extends React.Component {
                             <TextField fullWidth name="body" placeholder="Add post" multiline variant="outlined" />
                         </Grid>
                         {this.state.profileImage !== null &&
-                            <Grid item xs={12}>
+                            <Grid item xs={12} className="py-1">
                                 <img id="profileImageSrc" src={this.state.profileImage} alt="Post image" style={{ objectFit: "contain", width:"100%", padding:"2px" }} />
                             </Grid>
                         }
@@ -43,9 +43,7 @@ class AddPost extends React.Component {
                         <Grid item xs={12}>
                             <input name="image" accept="image/*" className="d-none" id="postImageInput" type="file" onChange={this.handleInputImage} />
                             <label htmlFor="postImageInput">
-                                <IconButton aria-label="upload picture" component="span">
-                                    <Image />
-                                </IconButton>
+                                <Button aria-label="upload picture" component="span" startIcon={<Image/>}>Add Image</Button>
                             </label>
                             {this.state.profileImage!==null &&
                                 <Button onClick={(e)=>{document.getElementById("postImageInput").value=""; this.setState({profileImage: null});}}>Remove Image</Button>

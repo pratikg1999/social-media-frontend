@@ -36,6 +36,7 @@ class LoginApp extends Component {
         axios.post("/auth/signin", { email: this.state.email, password: this.state.password }).then(response => {
             if (response.status === 200) {
                 localStorage.setItem("x-access-token", response.data.accessToken);
+                axios.defaults.headers['x-access-token'] = window.localStorage["x-access-token"];
                 this.props.history.push(`/home`);
             }
             else {

@@ -60,6 +60,39 @@ class Home extends Component {
         });
     }
 
+    changePostLike = (postId, status) => {
+        const postData = {postId : postId};
+        if(status){
+            axios.put("/post/likes", postData).then(({ data }) => {
+                this.fetchPosts();
+            }).catch((err) => {
+                if (err.response) {
+                    console.log("Error liking", err.response);
+                }
+                else {
+                    console.log("Error liking no response ", err);
+                }
+                this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error liking!" });
+    
+            });
+        }
+        else{
+            axios.delete("/post/likes", {data: postData}).then(({ data }) => {
+                this.fetchPosts();
+            }).catch((err) => {
+                if (err.response) {
+                    console.log("Error unliking", err.response);
+                }
+                else {
+                    console.log("Error unliking no response ", err);
+                }
+                this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error unliking!" });
+    
+            });
+
+        }
+    }
+
     render() {
         const post = {
             userName: "Pratik Gupta",
@@ -97,7 +130,7 @@ class Home extends Component {
                         this.props.postsData.map(postData => {
                             return (
                                 <React.Fragment key={postData.post._id}>
-                                    <PostCard post={postData.post} comments={postData.comments} addComment={this.addComment} />
+                                    <PostCard post={postData.post} comments={postData.comments} addComment={this.addComment} changePostLike={this.changePostLike} />
                                     <br />
                                     <br />
                                 </React.Fragment>

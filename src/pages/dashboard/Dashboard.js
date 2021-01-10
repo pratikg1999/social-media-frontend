@@ -7,11 +7,6 @@ import {
     Grid,
     Paper,
     Typography,
-    Link,
-    Dialog,
-    DialogContent,
-    DialogContentText,
-    Drawer,
     AppBar,
     Toolbar,
     MenuItem,
@@ -20,8 +15,10 @@ import {
     Backdrop,
     CircularProgress,
     Snackbar,
+    Avatar,
 } from "@material-ui/core";
-import { Dashboard as DashboardIcon, AccountCircle } from "@material-ui/icons";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Dashboard as DashboardIcon, AccountCircle, Search } from "@material-ui/icons";
 import { Switch, Route } from "react-router-dom";
 import ProfilePage from "../profile/ProfilePage";
 import Home from "../home/home";
@@ -49,6 +46,11 @@ const styles = (theme) => {
 
 class Dashboard extends Component {
 
+    constructor(props){
+        super(props);
+        axios.defaults.headers['x-access-token'] = window.localStorage["x-access-token"];
+    }
+
     handleMenu = (event) => {
         // console.log("opening menu ", event.currentTarget);
         this.setState({ anchorEl: event.currentTarget });
@@ -61,15 +63,21 @@ class Dashboard extends Component {
     }
 
     state = {
+        autoUser: null,
         anchorEl: null,
+    }
+
+    searchUser = (e)=>{
+        console.log("searching user");
+        if(this.state.autoUser!=null){
+            this.props.history.push(`/profile/${this.state.autoUser._id}`);
+        }
     }
 
 
     componentDidMount() {
-        axios.defaults.headers['x-access-token'] = window.localStorage["x-access-token"];
-
         axios.get("/user/getCurrentUserInfo").then((response) => {
-            console.log(response.data);
+            // console.log(response.data);
             response.data.profileImage = axios.defaults.baseURL + response.data.profileImage;
             this.props.modifyState({ isLoading: false, currentUserInfo: response.data, showSnackbar: true, snackbarMessage: "User  info fetched" });
         }).catch((err) => {
@@ -80,8 +88,27 @@ class Dashboard extends Component {
                 console.log("fetch error no response ", err);
             }
             this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Some error occured!" });
+        });
+
+        axios.get("/user/").then((response) => {
+            console.log("all users", response.data);
+            this.props.modifyState({ isLoading: false, users: response.data, showSnackbar: true, snackbarMessage: "All users fetched" });
+        }).catch((err) => {
+            if (err.response) {
+                console.log("all users fetching user error", err.response);
+            }
+            else {
+                console.log("all users fetch error no response ", err);
+            }
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Some error occured all users!" });
         })
 
+    }
+
+    logout = ()=>{
+        window.localStorage.removeItem("x-access-token");
+        this.props.clearState();
+        this.props.history.push("/");
     }
 
     render() {
@@ -95,9 +122,50 @@ class Dashboard extends Component {
                 }
                 <AppBar position="static">
                     <Toolbar>
-                        <Typography variant="h6" className={classes.title}>
+                        <Typography variant="h6" className={classes.title} onClick={()=>{this.props.history.push("/home")}} style={{cursor: "pointer"}}>
                             Social-media
-                </Typography>
+                        </Typography>
+                        {this.props.users !== undefined &&
+                            <>
+                                <Autocomplete
+                                    value={this.state.autoUser}
+                                    onChange={(event, newValue) => {
+                                        this.setState({ autoUser: newValue });
+                                    }}
+                                    id="find-users"
+                                    style={{ width: 300 }}
+                                    options={this.props.users}
+                                    autoHighlight
+                                    getOptionLabel={(option) => option.firstName + " " + option.lastName}
+                                    renderOption={(option) => (
+                                        <React.Fragment>
+                                            <span className="pr-1"><Avatar alt={option.firstName[0].toUpperCase() + option.lastName[0].toUpperCase()}
+                                                src={axios.defaults.baseURL + option.profileImage}
+                                            />
+                                            </span>
+                                            {option.firstName +" "+ option.lastName}
+                                        </React.Fragment>
+                                    )}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            style={{backgroundColor: "#ffffff25"}}
+                                            className="p-1"
+                                            placeholder="Find a user"
+                                            inputProps={{
+                                                style:{color: "white",},
+                                                ...params.inputProps,
+                                                className:"px-1",
+                                                autoComplete: 'new-password', // disable autocomplete and autofill
+                                            }}
+                                        />
+                                    )}
+                                />
+                                <IconButton onClick={this.searchUser}>
+                                    <Search/>
+                                </IconButton>
+                            </>
+                        }
                         <div>
                             <IconButton
                                 aria-label="account of current user"
@@ -123,8 +191,9 @@ class Dashboard extends Component {
                                 open={this.state.anchorEl ? true : false}
                                 onClose={this.handleMenuClose}
                             >
-                                <MenuItem onClick={()=>{this.props.history.push("/profile"); this.handleMenuClose();}}>Profile</MenuItem>
-                                <MenuItem onClick={this.handleMenuClose}>My account</MenuItem>
+                                <MenuItem onClick={() => { this.props.history.push(`/profile/${this.props.currentUserInfo._id}`); this.handleMenuClose(); }}>My profile</MenuItem>
+                                <MenuItem onClick={() => { this.props.history.push("/profile"); this.handleMenuClose(); }}>Edit account</MenuItem>
+                                <MenuItem onClick={()=>{this.logout()}}>Logout</MenuItem>
                             </Menu>
                         </div>
                     </Toolbar>
@@ -158,12 +227,14 @@ const mapStateToProps = state => {
         currentUserInfo: state.currentUserInfo,
         showSnackbar: state.showSnackbar,
         snackbarMessage: state.snackbarMessage,
+        users: state.users,
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
         modifyState: (newState) => dispatch({ type: actions.MODIFY_STATE, newState: newState }),
+        clearState: () => dispatch({ type: actions.CLEAR_STATE}),
     }
 }
 
