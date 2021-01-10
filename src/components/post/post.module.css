@@ -1,0 +1,20 @@
+.postImage {
+    width: 100%;
+    object-fit: contain;
+    max-height: 50vh;
+}
+
+.title{
+    font-size: large;
+    font-weight: bold;
+}
+
+.subtitle{
+    font-size: x-small;
+    color: darkgrey;
+}
+
+.postBody {
+    font-size: medium;
+    padding: 5px;
+}

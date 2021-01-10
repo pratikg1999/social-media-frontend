@@ -1,0 +1,12 @@
+.title{
+    font-size: large;
+    font-weight: bold;
+}
+
+.subtitle{
+    font-size: x-small;
+    color: darkgrey;
+}
+.commentBody {
+    font-size: small;
+}
