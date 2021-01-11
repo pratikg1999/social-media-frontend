@@ -13,9 +13,26 @@ class ProfilePage extends Component {
         this.fetchUserInfo();
     }
 
+    fetchPosts = () => {
+        axios.get("/post/fetchPosts").then(({ data }) => {
+            this.props.modifyState({ postsData: data });
+        }).catch(err => {
+            if (err.response) {
+                console.log("fError fetching posts!", err.response);
+            }
+            else {
+                console.log("Error fetching posts! no response", err);
+            }
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error fetching posts!" });
+
+        });
+    }
+
+
     onFollow = (followingId) => {
         axios.put("/user/following", {followingId: followingId}).then(({data})=>{
             this.fetchUserInfo();
+            this.fetchPosts();
         })
         .catch(err=>{
             console.log(err);
@@ -27,6 +44,7 @@ class ProfilePage extends Component {
     onUnfollow = (followingId)=>{
         axios.delete("/user/following", {data:{followingId: followingId}}).then(({data})=>{
             this.fetchUserInfo();
+            this.fetchPosts();
         })
         .catch(err=>{
             console.log(err);

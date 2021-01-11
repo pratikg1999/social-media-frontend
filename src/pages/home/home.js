@@ -10,7 +10,7 @@ import { Box } from "@material-ui/core";
 
 class Home extends Component {
     componentDidMount() {
-        if (!this.props.postsData) {
+        if (!this.props.postsData || this.props.postsData.length===0) {
             this.fetchPosts();
         }
     }
@@ -47,7 +47,9 @@ class Home extends Component {
 
     addComment = (newComment) => {
         axios.post("/comment/createComment", newComment, {headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'}}).then(({ data }) => {
-            this.fetchPosts();
+            console.log("comment to add", data);
+            this.props.addCommentToState(data);
+            // this.fetchPosts();
         }).catch((err) => {
             if (err.response) {
                 console.log("Error commenting", err.response);
@@ -60,11 +62,13 @@ class Home extends Component {
         });
     }
 
+    
     changePostLike = (postId, status) => {
         const postData = {postId : postId};
         if(status){
             axios.put("/post/likes", postData).then(({ data }) => {
-                this.fetchPosts();
+                this.props.updateLikes(postId, data);
+                // this.fetchPosts();
             }).catch((err) => {
                 if (err.response) {
                     console.log("Error liking", err.response);
@@ -73,12 +77,13 @@ class Home extends Component {
                     console.log("Error liking no response ", err);
                 }
                 this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error liking!" });
-    
+                
             });
         }
         else{
             axios.delete("/post/likes", {data: postData}).then(({ data }) => {
-                this.fetchPosts();
+                // this.fetchPosts();
+                this.props.updateLikes(postId, data);
             }).catch((err) => {
                 if (err.response) {
                     console.log("Error unliking", err.response);
@@ -87,33 +92,44 @@ class Home extends Component {
                     console.log("Error unliking no response ", err);
                 }
                 this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error unliking!" });
-    
+                
             });
-
+            
         }
     }
 
-    render() {
-        const post = {
-            userName: "Pratik Gupta",
-            body: "hello comment",
-            creationTime: new Date(),
-            userImage: "logo192.png"
-        }
-        const comments = [
-            {
-                userName: "Pratik Gupta",
-                body: "hello comment",
-                creationTime: new Date(Date.now() - 65465456),
-                userImage: "logo192.png"
-            },
-            {
-                userName: "Pranay Gupta",
-                body: "tempdfkjldkj comment",
-                creationTime: new Date(),
-                userImage: "logo192.png"
+    onDelete  = (postId) => {
+        axios.delete(`/post/${postId}`).then(({ data }) => {
+            console.log("delete post", postId, data);
+            this.props.deletePost(postId);
+        }).catch((err) => {
+            if (err.response) {
+                console.log("Error deleting", err.response);
             }
-        ]
+            else {
+                console.log("Error deleting no response ", err);
+            }
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error deleting post!" });
+        });
+    }
+
+    onEdit = (postId, postData) => {
+        // console.log("onEdit", postData.body.value, postData.image.value);
+        axios.put(`/post/${postId}`, postData).then(({ data }) => {
+            console.log("edit post", postId, data);
+            this.props.editPost(postId, data);
+        }).catch((err) => {
+            if (err.response) {
+                console.log("Error editing", err.response);
+            }
+            else {
+                console.log("Error editing no response ", err);
+            }
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error editing post!" });
+        });
+    }
+    
+    render() {
         return (
             <>
                 <div style={{ width: "70%", margin: "auto" }}>
@@ -130,7 +146,7 @@ class Home extends Component {
                         this.props.postsData.map(postData => {
                             return (
                                 <React.Fragment key={postData.post._id}>
-                                    <PostCard post={postData.post} comments={postData.comments} addComment={this.addComment} changePostLike={this.changePostLike} />
+                                    <PostCard post={{...(postData.post)}} comments={[...(postData.comments)]} addComment={this.addComment} changePostLike={this.changePostLike} onDelete={this.onDelete} onEdit={this.onEdit} />
                                     <br />
                                     <br />
                                 </React.Fragment>
@@ -156,6 +172,10 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         modifyState: (newState) => dispatch({ type: actions.MODIFY_STATE, newState: newState }),
+        addCommentToState: (comment) => dispatch({ type: actions.ADD_COMMENT, comment: comment }),
+        updateLikes: (postId, likes) => dispatch({ type: actions.UPDATE_LIKES, postId: postId, likes: likes}),
+        deletePost: (postId) => dispatch({ type: actions.DELETE_POST, postId: postId}),
+        editPost: (postId, updatedPost) => dispatch({ type: actions.EDIT_POST, postId: postId, updatedPost: updatedPost}),
     }
 }
 
