@@ -76,6 +76,10 @@ class Dashboard extends Component {
 
 
     componentDidMount() {
+        if(!window.localStorage["x-access-token"]){
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "You need to login first" });
+            this.props.history.push("/");
+        }
         axios.get("/user/getCurrentUserInfo").then((response) => {
             // console.log(response.data);
             response.data.profileImage = axios.defaults.baseURL + response.data.profileImage;
