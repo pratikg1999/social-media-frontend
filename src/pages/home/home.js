@@ -45,6 +45,22 @@ class Home extends Component {
         });
     }
 
+    onCommentDelete = (commentId, postId)=>{
+        console.log("comment to delete", commentId);
+        axios.delete(`/comment/${commentId}`).then(({ data }) => {
+            console.log("delete comment", commentId, data);
+            this.props.deleteComment(commentId, postId);
+        }).catch((err) => {
+            if (err.response) {
+                console.log("Error deleting comment", err.response);
+            }
+            else {
+                console.log("Error deleting comment no response ", err);
+            }
+            this.props.modifyState({ isLoading: false, showSnackbar: true, snackbarMessage: "Error deleting comment!" });
+        });
+    }
+
     addComment = (newComment) => {
         axios.post("/comment/createComment", newComment, {headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'}}).then(({ data }) => {
             console.log("comment to add", data);
@@ -146,7 +162,7 @@ class Home extends Component {
                         this.props.postsData.map(postData => {
                             return (
                                 <React.Fragment key={postData.post._id}>
-                                    <PostCard post={{...(postData.post)}} comments={[...(postData.comments)]} addComment={this.addComment} changePostLike={this.changePostLike} onDelete={this.onDelete} onEdit={this.onEdit} />
+                                    <PostCard post={{...(postData.post)}} comments={[...(postData.comments)]} addComment={this.addComment} changePostLike={this.changePostLike} onDelete={this.onDelete} onEdit={this.onEdit} onCommentDelete={this.onCommentDelete}/>
                                     <br />
                                     <br />
                                 </React.Fragment>
@@ -176,6 +192,7 @@ const mapDispatchToProps = dispatch => {
         updateLikes: (postId, likes) => dispatch({ type: actions.UPDATE_LIKES, postId: postId, likes: likes}),
         deletePost: (postId) => dispatch({ type: actions.DELETE_POST, postId: postId}),
         editPost: (postId, updatedPost) => dispatch({ type: actions.EDIT_POST, postId: postId, updatedPost: updatedPost}),
+        deleteComment: (commentId, postId) => dispatch({ type: actions.DELETE_COMMENT, commentId: commentId, postId: postId}),
     }
 }
 

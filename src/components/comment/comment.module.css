@@ -1,6 +1,8 @@
 .title{
     font-size: small;
     font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
 .subtitle{

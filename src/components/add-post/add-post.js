@@ -36,7 +36,7 @@ class AddPost extends React.Component {
                         </Grid>
                         {this.state.profileImage !== null &&
                             <Grid item xs={12} className="py-1">
-                                <img id="profileImageSrc" src={this.state.profileImage} alt="Post image" style={{ objectFit: "contain", width:"100%", padding:"2px" }} />
+                                <img id="profileImageSrc" src={this.state.profileImage} alt="Post image" style={{ objectFit: "contain", width:"100%", padding:"2px", maxHeight:"60vh" }} />
                             </Grid>
                         }
 

@@ -127,7 +127,13 @@ const PostCard = (props) => {
                         <Grid item xs={12}>
                             {props.comments.map(comment => {
                                 // console.log(comment);
-                                return (<Comment {...comment} key={comment.username + comment.creationTime} />);
+
+                                return (
+                                props.currentUserInfo !== undefined && props.currentUserInfo._id == comment.createdBy._id ?
+                                <Comment {...comment} onCommentDelete={props.onCommentDelete} key={comment.createdBy.firstName+ comment.createdBy.lastName + comment.creationTime} />
+                                :
+                                <Comment {...comment} key={comment.firstName+ comment.createdBy.lastName + comment.createdBy.creationTime} />
+                            );
                             })}
                         </Grid>
                     </CardContent>

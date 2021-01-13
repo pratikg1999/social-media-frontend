@@ -35,7 +35,7 @@ const styles = (theme) => {
             marginRight: theme.spacing(2),
         },
         title: {
-            flexGrow: 1,
+            marginRight: "auto",
         },
         backdrop: {
             zIndex: theme.zIndex.drawer + 1,

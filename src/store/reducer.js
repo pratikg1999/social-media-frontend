@@ -25,6 +25,10 @@ const reducer = (state = initialState, action) => {
         case actionTypes.EDIT_POST:
             state.postsData.find(e=>e.post._id === action.postId).post = action.updatedPost;
             return { ...state, postsData: [...state.postsData] }
+        case actionTypes.DELETE_COMMENT:
+            let post = state.postsData.find(e=>e.post._id === action.postId);
+            post.comments.splice(post.comments.findIndex(e=>e._id === action.commentId),1);
+            return { ...state, postsData: [...state.postsData] }
         default:
             return state;
     }
